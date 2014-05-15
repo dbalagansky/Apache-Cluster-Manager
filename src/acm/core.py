@@ -13,7 +13,6 @@
 # limitations under the License.
 ## Package acm.core
 ## Core objects for Apache Cluster Manager project
-from termcolor import colored
 from functional import curry
 from urllib2 import Request,urlopen
 import re
@@ -146,7 +145,7 @@ class Server():
   def __str__(self):
     boldblink=['bold', 'blink']
     bold=['bold']
-    return 'Server (%d vhosts) [%s]: ip=%s, port=%s' % (len(self.vhosts), (colored('KO', 'red', attrs=boldblink) if self.error else colored('OK', 'green', attrs=bold)), self.ip, self.port)
+    return 'Server (%d vhosts) [%s]: ip=%s, port=%s' % (len(self.vhosts), ('\033[31mFAIL\033[0m' if self.error else '\033[32mOK\033[0m'), self.ip, self.port)
     
 class Cluster():
   """Class representing a group of apache Servers - contains a list of Servers"""
