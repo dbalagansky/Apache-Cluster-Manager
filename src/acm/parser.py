@@ -17,7 +17,7 @@ from HTMLParser import HTMLParser
 from urllib2 import Request,urlopen,URLError
 from core import LoadBalancer,Worker,Cluster,Server
 from functional import curry
-from configobj import ConfigObj
+import ConfigParser as CP
 import re
 import sys
 from exceptions import SyntaxError
@@ -106,52 +106,42 @@ class ConfigParser():
 
   def readConf(self):
     '''Read a configuration file (configobj format) and return a list of Clusters'''
+    config = CP.ConfigParser({'secure': False, 'modealt': False, })
+    config.read(self.filename)
     result = []
-    config = ConfigObj(self.filename)
 
-    clusters = self._getConfigValue(config, 'clusters')
-    if not isinstance(clusters, list):
-      raise SyntaxError('Configuration error [%s] - clusters is not a list. Add a coma to create one' % self.filename)
+    clusters = config.get('main', 'clusters').split(',')
 
-    for c in iter(self._getConfigValue(config, 'clusters')):
+    for c in clusters:
       cluster = Cluster()
-      cluster.name = self._getConfigValue(config, c, 'name')
+      cluster.name = config.get(c, 'name')
       #print ('Cluster found : %s' % cluster.name)
 
-      for s in iter(self._getConfigValue(config, c, 'servers')):
+      for s in config.get(c, 'servers').split(','):
         srv = Server()
-        srv.ip = self._getConfigValue(config, s, 'ip')
-        srv.port = self._getConfigValue(config, s, 'port')
-	srv.secure = self._getConfigValue(config, s, 'secure')
-        srv.modealt = self._getConfigValue(config, s, 'modealt')
+        srv.ip = config.get(s, 'ip')
+        srv.port = config.get(s, 'port')
+        srv.secure =  config.get(s, 'secure')
+        srv.modealt = config.get(s, 'modealt')
         #print ('Server found : %s:%s' % (srv.ip, srv.port))
-	##
-	vhosts = self._getConfigValue(config, s, 'vhosts')
-	if isinstance(vhosts, list):
-	  ## If no vhost defined, switch to a default one
-	  if len(vhosts) == 0: srv.add_vhost('')
-          for vh in iter(self._getConfigValue(config, s, 'vhosts')):
-            vhost_name = self._getConfigValue(config, vh, 'name')
-            vhost_burl = self._getConfigValue(config, vh, 'burl')
+        try:
+          vhosts = config.get(s, 'vhosts').split(',')
+          if len(vhosts) == 0:
+            raise CP.NoOptionError
+        except CP.NoOptionError:
+          srv.add_vhost('')
+        else:
+          for vh in vhosts:
+            vhost_name = config.get(vh, 'name')
+            vhost_burl = config.get(vh, 'burl')
             #print ('Vhost found : %s/%s' % (vhost_name, vhost_burl))
             srv.add_vhost(vhost_name, vhost_burl)
-	else:
-	  raise SyntaxError('Configuration error [%s] - [%s].vhosts is not a list. Add a coma to create one' % (self.filename, s))
 
         cluster.servers.append(srv)
 
       ## Appending cluster object to returned result
       result.append(cluster)
     return result
-
-  def _getConfigValue(self, config, *keys):
-    ret = config
-    try:
-      for k in iter(keys):
-        ret = ret[k]
-    except KeyError:
-      return []
-    return ret
 
 def fetch_balancer_manager_page(srv, vhost=None):
   vh = vhost
