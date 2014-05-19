@@ -106,7 +106,7 @@ class ConfigParser():
 
   def readConf(self):
     '''Read a configuration file (configobj format) and return a list of Clusters'''
-    config = CP.ConfigParser({'secure': False, 'modealt': False, })
+    config = CP.ConfigParser({'secure': 'false', 'modealt': 'false', })
     config.read(self.filename)
     result = []
 
@@ -121,8 +121,8 @@ class ConfigParser():
         srv = Server()
         srv.ip = config.get(s, 'ip')
         srv.port = config.get(s, 'port')
-        srv.secure =  config.get(s, 'secure')
-        srv.modealt = config.get(s, 'modealt')
+        srv.secure =  config.getboolean(s, 'secure')
+        srv.modealt = config.getboolean(s, 'modealt')
         #print ('Server found : %s:%s' % (srv.ip, srv.port))
         try:
           vhosts = config.get(s, 'vhosts').split(',')
