@@ -100,7 +100,7 @@ class BalancerManagerParser(HTMLParser):
     self.lbptr = -1
     self.wptr  = -1
 
-class ConfigParser():
+class ConfigParser:
   def __init__(self, filename):
     self.filename = filename
 

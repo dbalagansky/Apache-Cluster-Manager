@@ -17,7 +17,7 @@ from functional import curry
 from urllib2 import Request,urlopen
 import re
 
-class Worker():
+class Worker:
   """apache Load Balancer Worker class"""
   def __init__(self, parentServer, parentVHost):
     self.mark = False
@@ -78,18 +78,18 @@ class Worker():
 
   def __str__(self):
     if self.Status == 'OK': 
-      self.Status = '\033[3mOK\033[0m'
+      status = '\033[32mOK\033[0m'
     elif self.Status == 'Err':
-      self.Status = '\033[31mErr\033[0m'
+      status = '\033[31mErr\033[0m'
     elif self.Status == 'Dis':
-      self.Status = '\033[37mDis\033[0m'
+      status = '\033[31mDis\033[0m'
     else:
       pass
     return '  Worker: Worker_URL=%s, Route=%s, RouteRedir=%s, Factor=%s, Set=%s, Status=%s, Elected=%s, To=%s, From=%s' % \
-      (self.Worker_URL, self.Route, self.RouteRedir, self.Factor, self.Set, self.Status, self.Elected, self.To, self.From)
+      (self.Worker_URL, self.Route, self.RouteRedir, self.Factor, self.Set, status, self.Elected, self.To, self.From)
 
 
-class LoadBalancer():
+class LoadBalancer:
   """apache Load Balancer class - contains a list of Workers"""
   def __init__(self):
     self.mark = False
@@ -110,7 +110,7 @@ class LoadBalancer():
       (len(self.workers), self.name, self.StickySession, self.Timeout, self.FailoverAttempts, self.Method)
     
 
-class VHost():
+class VHost:
   """Class representing a VHost - contains a list of LoadBalancers"""
   def __init__(self):
     self.mark = False
@@ -127,7 +127,7 @@ class VHost():
     return 'vhost: (%d lbs): name=%s, balancerUrlPath=%s' % (len(self.lbs), self.name, self.balancerUrlPath)
 
 
-class Server():
+class Server:
   """Class representing an apache httpd server - contains a list of VHosts"""
   def __init__(self):
     self.mark = False
@@ -151,11 +151,13 @@ class Server():
       vh.setMark(m)
 
   def __str__(self):
-    boldblink=['bold', 'blink']
-    bold=['bold']
-    return 'Server (%d vhosts) [%s]: ip=%s, port=%s' % (len(self.vhosts), ('\033[31mFAIL\033[0m' if self.error else '\033[32mOK\033[0m'), self.ip, self.port)
+    if self.error:
+      status = '\033[31mFAIL\033[0m'
+    else:
+      status = '\033[32mOK\033[0m'
+    return 'Server (%d vhosts) [%s]: ip=%s, port=%s' % (len(self.vhosts), status, self.ip, self.port)
     
-class Cluster():
+class Cluster:
   """Class representing a group of apache Servers - contains a list of Servers"""
   def __init__(self):
     self.mark = False
