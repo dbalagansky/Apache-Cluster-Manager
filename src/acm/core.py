@@ -77,14 +77,14 @@ class Worker:
     return True
 
   def __str__(self):
-    if self.Status == 'OK': 
+    if self.Status == 'Ok': 
       status = '\033[32mOK\033[0m'
     elif self.Status == 'Err':
       status = '\033[31mErr\033[0m'
     elif self.Status == 'Dis':
       status = '\033[31mDis\033[0m'
     else:
-      pass
+      status = self.Status
     return '  Worker: Worker_URL=%s, Route=%s, RouteRedir=%s, Factor=%s, Set=%s, Status=%s, Elected=%s, To=%s, From=%s' % \
       (self.Worker_URL, self.Route, self.RouteRedir, self.Factor, self.Set, status, self.Elected, self.To, self.From)
 
